@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:11.5-alpine
+    environment:
+      POSTGRES_PASSWORD: letmein
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    image: dev/django-prometheus-demo
+    build:
+      context: .
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    environment:
+      DB_PASSWORD: letmein
+      DB_USER: postgres
+      DB_NAME: postgres
+      DB_HOST: postgres
+      DEBUG: 1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./demo:/code/
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+volumes:
+  pgdata: {}
